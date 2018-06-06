@@ -5,9 +5,18 @@
 # URL
 
 ```
-$ curl localhost:8080/wait/1 
-bow-wow!  # 1 second ago
+$ curl https://waiting-dog.herokuapp.com/  # health check
+{"health": "ok"}
 
-$ curl localhost:8080/wait/100
-bow-wow!  # 100 second ago
+$ curl https://waiting-dog.herokuapp.com/wait/1 
+# wait 1 second ...
+{"message": "bow-wow!"}
+
+$ curl https://waiting-dog.herokuapp.com/wait/100
+# wait 100 second ...
+{"message": "bow-wow!"}
+
+$ curl https://waiting-dog.herokuapp.com/wait/random
+# wait random time (1 - 10 second)
+{"message": "bow-wow!"}
 ```
