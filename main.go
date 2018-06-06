@@ -13,6 +13,8 @@ import (
 )
 
 func wait(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	vars := mux.Vars(r)
 	waitTime := vars["time"]
 
@@ -23,20 +25,22 @@ func wait(w http.ResponseWriter, r *http.Request) {
 	}
 
 	time.Sleep(time.Duration(i) * time.Second)
-	fmt.Fprintf(w, "bow-wow!")
+	fmt.Fprintf(w, `{"message": "bow-wow!"}`)
 
 }
 
 func waitRandom(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	rand.Seed(time.Now().UnixNano())
 
-	ra := rand.Int63n(10)
+	ra := rand.Int63n(10) // 1 ~ 10
 	time.Sleep(time.Duration(ra) * time.Second)
 
-	fmt.Fprintf(w, "bow-wow!")
+	fmt.Fprintf(w, `{"message": "bow-wow!"}`)
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, `{"health": "ok"}`)
 }
 
