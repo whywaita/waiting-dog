@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
@@ -26,6 +27,15 @@ func wait(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func waitRandom(w http.ResponseWriter, r *http.Request) {
+	rand.Seed(time.Now().UnixNano())
+
+	ra := rand.Int63n(10)
+	time.Sleep(time.Duration(ra) * time.Second)
+
+	fmt.Fprintf(w, "bow-wow!")
+}
+
 func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, `{"health": "ok"}`)
 }
@@ -38,6 +48,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Path("/").HandlerFunc(index)
+	router.Path("/wait/random").HandlerFunc(waitRandom)
 	router.Path("/wait/{time}").HandlerFunc(wait)
 
 	if err := http.ListenAndServe(":"+port, router); err != nil {
