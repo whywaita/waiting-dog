@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -55,7 +56,18 @@ func main() {
 	router.Path("/wait/random").HandlerFunc(waitRandom)
 	router.Path("/wait/{time}").HandlerFunc(wait)
 
-	if err := http.ListenAndServe(":"+port, router); err != nil {
-		log.Fatal("[ERROR]", err)
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf("%s:%s", "0.0.0.0", port))
+	if err != nil {
+		log.Fatal("[ERROR] ", err)
+	}
+
+	listener, err := net.ListenTCP("tcp4", tcpAddr)
+	if err != nil {
+		log.Fatal("[ERROR] ", err)
+	}
+	defer listener.Close()
+
+	if err := http.Serve(listener, router); err != nil {
+		log.Fatal("[ERROR] ", err)
 	}
 }
