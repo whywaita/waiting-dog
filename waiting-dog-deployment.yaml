@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: waiting-dog-deployment
+  labels:
+    app: waiting-dog
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: waiting-dog
+  template:
+    metadata:
+      labels:
+        app: waiting-dog
+    spec:
+      containers:
+      - name: waiting-dog
+        image: whywaita/waiting-dog:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: PORT
+          value: "80"
