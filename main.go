@@ -21,7 +21,7 @@ func wait(w http.ResponseWriter, r *http.Request) {
 
 	i, err := strconv.ParseInt(waitTime, 10, 64)
 	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		http.Error(w, `{"error": "Bad Request"}`, http.StatusBadRequest)
 		return
 	}
 
