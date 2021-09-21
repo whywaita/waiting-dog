@@ -1,47 +1,58 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gorilla/handlers"
 	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func wait(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+type Resp struct {
+	Message string `json:"message"`
+}
 
-	vars := mux.Vars(r)
-	waitTime := vars["time"]
+type ErrorResp struct {
+	Error string `json:"error"`
+}
+
+func wait(c echo.Context) error {
+	waitTime := c.Param("time")
 
 	i, err := strconv.ParseInt(waitTime, 10, 64)
 	if err != nil {
-		http.Error(w, `{"error": "Bad Request"}`, http.StatusBadRequest)
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
 	}
-
 	time.Sleep(time.Duration(i) * time.Second)
-	fmt.Fprintf(w, `{"message": "bow-wow!"}`)
 
+	resp := Resp{
+		Message: "bow-wow!",
+	}
+	return c.JSON(http.StatusOK, resp)
 }
 
-func waitRandom(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func waitRandom(c echo.Context) error {
 	rand.Seed(time.Now().UnixNano())
 
 	ra := rand.Int63n(10) // 1 ~ 10
 	time.Sleep(time.Duration(ra) * time.Second)
 
-	fmt.Fprintf(w, `{"message": "bow-wow!"}`)
+	resp := Resp{
+		Message: "bow-wow!",
+	}
+	return c.JSON(http.StatusOK, resp)
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"health": "ok"}`)
+func index(c echo.Context) error {
+	h := struct {
+		Health string `json:"health"`
+	}{
+		Health: "ok",
+	}
+	return c.JSON(http.StatusOK, h)
 }
 
 func main() {
@@ -50,12 +61,13 @@ func main() {
 		port = "8080"
 	}
 
-	router := mux.NewRouter()
-	router.Path("/").HandlerFunc(index)
-	router.Path("/wait/random").HandlerFunc(waitRandom)
-	router.Path("/wait/{time}").HandlerFunc(wait)
+	e := echo.New()
 
-	h1 := handlers.CombinedLoggingHandler(os.Stdout, router)
+	e.Use(middleware.Logger())
 
-	http.ListenAndServe(":"+port, h1)
+	e.GET("/", index)
+	e.GET("/wait/random", waitRandom)
+	e.GET("/wait/:time", wait)
+
+	e.Logger.Fatal(e.Start(":" + port))
 }
