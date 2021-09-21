@@ -19,12 +19,27 @@ type ErrorResp struct {
 	Error string `json:"error"`
 }
 
-func wait(c echo.Context) error {
+var (
+	stayTime = 0
+)
+
+func GetWait(c echo.Context) error {
+	if stayTime >= 0 {
+		time.Sleep(time.Duration(stayTime) * time.Second)
+	}
+
+	resp := Resp{
+		Message: "bow-wow!",
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+func GetWaitTime(c echo.Context) error {
 	waitTime := c.Param("time")
 
 	i, err := strconv.ParseInt(waitTime, 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad Request")
+		return err
 	}
 	time.Sleep(time.Duration(i) * time.Second)
 
@@ -34,7 +49,7 @@ func wait(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-func waitRandom(c echo.Context) error {
+func GetWaitRandom(c echo.Context) error {
 	rand.Seed(time.Now().UnixNano())
 
 	ra := rand.Int63n(10) // 1 ~ 10
@@ -42,6 +57,24 @@ func waitRandom(c echo.Context) error {
 
 	resp := Resp{
 		Message: "bow-wow!",
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+type ParamPostSay struct {
+	T int `json:"time"`
+}
+
+func PostSay(c echo.Context) error {
+	t := c.Param("time")
+	i, err := strconv.Atoi(t)
+	if err != nil {
+		return err
+	}
+
+	stayTime = i
+	resp := Resp{
+		Message: "bow?",
 	}
 	return c.JSON(http.StatusOK, resp)
 }
@@ -66,8 +99,10 @@ func main() {
 	e.Use(middleware.Logger())
 
 	e.GET("/", index)
-	e.GET("/wait/random", waitRandom)
-	e.GET("/wait/:time", wait)
+	e.GET("/wait", GetWait)
+	e.GET("/wait/random", GetWaitRandom)
+	e.GET("/wait/:time", GetWaitTime)
+	e.POST("/say/:time", PostSay)
 
 	e.Logger.Fatal(e.Start(":" + port))
 }
