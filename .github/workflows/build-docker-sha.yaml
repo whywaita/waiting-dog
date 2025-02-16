@@ -32,6 +32,7 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/waiting-dog
           tags: |
             type=sha
+            value=latest
       - name: Build container image
         uses: docker/build-push-action@v5
         with:
@@ -50,6 +51,7 @@ jobs:
           images: whywaita.sakuracr.jp/waiting-dog
           tags: |
             type=sha
+            value=latest
       - name: Build container image
         uses: docker/build-push-action@v5
         with:
